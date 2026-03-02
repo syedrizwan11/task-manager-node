@@ -1,4 +1,3 @@
-import { userRoles } from "../constants/index.js"
 import { registerUser } from "../services/auth.service.js"
 import {
   deleteUser,

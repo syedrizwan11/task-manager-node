@@ -1,5 +1,5 @@
 import mongoose from "mongoose"
-import { taskStatus } from "../constants/index.js"
+import { TaskStatus } from "../constants/index.js"
 
 const taskSchema = new mongoose.Schema(
   {
@@ -13,8 +13,8 @@ const taskSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: [...taskStatus],
-      default: taskStatus[0],
+      enum: Object.values(TaskStatus),
+      default: TaskStatus.PENDING,
     },
     assignedTo: {
       type: mongoose.Schema.Types.ObjectId,
@@ -29,7 +29,7 @@ const taskSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
-    completedAt: Date,
+    completedAt: { type: Date, default: null },
   },
   { timestamps: true },
 )

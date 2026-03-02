@@ -1,8 +1,8 @@
+import { UserRoles } from "../constants/index.js"
 import { Task } from "../models/task.model.js"
 import { CustomError } from "../utils/customError.js"
 
 export const createTask = async (title, description, dueDate, user) => {
-  console.log(user, dueDate)
   const task = await Task.create({
     title,
     description,
@@ -14,7 +14,7 @@ export const createTask = async (title, description, dueDate, user) => {
 
 export const getTasks = async (user) => {
   const filter =
-    user.role === "admin"
+    user.role === UserRoles.ADMIN
       ? {}
       : { $or: [{ assignedTo: user.id }, { createdBy: user.id }] }
 
@@ -32,7 +32,7 @@ export const getTaskById = async (taskId, user) => {
   if (!task) throw new CustomError(404, "Task not found")
 
   if (
-    user.role !== "admin" &&
+    user.role !== UserRoles.ADMIN &&
     task.createdBy.toString() !== user.id &&
     task.assignedTo.toString() !== user.id
   ) {
@@ -60,17 +60,20 @@ export const updateTask = async (taskId, title, description, dueDate, user) => {
   return { updatedTask }
 }
 
-export const markTaskAsCompleted = async (taskId, user) => {
+export const updateTaskStatus = async (taskId, status, user) => {
   const task = await Task.findById(taskId)
 
   if (!task) throw new CustomError(404, "Task not found")
-  if (user.role !== "admin" && task.assignedTo.toString() !== user.id) {
+  if (user.role !== UserRoles.ADMIN && task.assignedTo.toString() !== user.id) {
     throw new CustomError(403, "forbidden: cannot update this task")
   }
 
   const updatedTask = await Task.findByIdAndUpdate(
     taskId,
-    { status: "completed", completedAt: new Date() },
+    {
+      status: status,
+      completedAt: status === taskStatus.COMPLETED ? new Date() : null,
+    },
     {
       new: true,
     },
@@ -79,7 +82,7 @@ export const markTaskAsCompleted = async (taskId, user) => {
 }
 
 export const assignTask = async (taskId, assignedTo, user) => {
-  if (user.role !== "admin")
+  if (user.role !== UserRoles.ADMIN)
     throw new CustomError(403, "only admins can assign tasks to others")
 
   const task = await Task.findById(taskId)
@@ -102,7 +105,7 @@ export const deleteTask = async (taskId, user) => {
   if (!task) throw new CustomError(404, "Task not found")
 
   let canDelete =
-    user.role === "admin" ||
+    user.role === UserRoles.ADMIN ||
     (task.createdBy.toString() === user.id &&
       (!task.assignedTo || task.assignedTo?.toString() === user.id))
 
@@ -114,7 +117,7 @@ export const deleteTask = async (taskId, user) => {
 }
 
 export const getTaskCount = async (user) => {
-  if (user.role !== "admin")
+  if (user.role !== UserRoles.ADMIN)
     throw new CustomError(403, "only admins can access task count")
 
   const count = await Task.countDocuments({})

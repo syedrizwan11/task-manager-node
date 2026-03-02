@@ -6,12 +6,13 @@ import {
   getTaskById,
   getTaskCount,
   getTasks,
-  markTaskAsCompleted,
   updateTask,
+  updateTaskStatus,
 } from "../services/task.service.js"
 import { apiResponse } from "../utils/apiResponse.js"
 import { CustomError } from "../utils/customError.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
+import { TaskStatus } from "../constants/index.js"
 
 const createTaskSchema = Joi.object({
   title: Joi.string().required(),
@@ -25,8 +26,11 @@ const updateTaskSchema = Joi.object({
   dueDate: Joi.date().optional(),
 })
 
-const markTaskAsCompletedSchema = Joi.object({
+const updateTaskStatusSchema = Joi.object({
   id: Joi.string().required(),
+  status: Joi.string()
+    .valid(...Object.values(TaskStatus))
+    .required(),
 })
 
 const assignTaskSchema = Joi.object({
@@ -87,14 +91,14 @@ export const updateTaskController = asyncHandler(async (req, res) => {
   apiResponse(res, 200, "task updated", data)
 })
 
-export const markTaskAsCompletedController = asyncHandler(async (req, res) => {
-  const { error, value } = markTaskAsCompletedSchema.validate(req.body)
+export const updateTaskStatusController = asyncHandler(async (req, res) => {
+  const { error, value } = updateTaskStatusSchema.validate(req.body)
   if (error) {
     throw new CustomError(400, error.details[0].message)
   }
-  const { id } = value
+  const { id, status } = value
 
-  const data = await markTaskAsCompleted(id, req.user)
+  const data = await updateTaskStatus(id, status, req.user)
 
   apiResponse(res, 200, "task updated", data.updatedTask)
 })

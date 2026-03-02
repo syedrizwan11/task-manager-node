@@ -6,8 +6,8 @@ import {
   getTaskByIdController,
   getTaskCountController,
   getTasksController,
-  markTaskAsCompletedController,
   updateTaskController,
+  updateTaskStatusController,
 } from "../controllers/task.controller.js"
 import { auth } from "../middlewares/auth.js"
 const router = Router()
@@ -19,7 +19,7 @@ router.delete("/tasks/:id", auth(), deleteTaskController)
 router.patch("/tasks/:id", auth(), updateTaskController)
 
 router.post("/assign-task", auth(["admin"]), assignTaskController)
-router.post("/mark-task-as-completed", auth(), markTaskAsCompletedController)
+router.post("/update-task-status", auth(), updateTaskStatusController)
 
 router.get("/tasks-count", auth(["admin"]), getTaskCountController)
 export default router

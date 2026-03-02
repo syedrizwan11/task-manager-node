@@ -1,3 +1,10 @@
-export const taskStatus = ["pending", "completed"]
+export const TaskStatus = Object.freeze({
+  PENDING: "pending",
+  INPROGRESS: "inprogress",
+  COMPLETED: "completed",
+})
 
-export const userRoles = ["user", "admin"]
+export const UserRoles = Object.freeze({
+  USER: "user",
+  ADMIN: "admin",
+})

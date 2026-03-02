@@ -1,3 +1,4 @@
+import { UserRoles } from "../constants/index.js"
 import { User } from "../models/user.model.js"
 import { CustomError } from "../utils/customError.js"
 import { generateCookieString, generateToken } from "./auth.service.js"
@@ -5,7 +6,7 @@ import { generateCookieString, generateToken } from "./auth.service.js"
 export const getUsers = async () => {
   const users = await User.find({
     isActive: true,
-    role: { $ne: "admin" },
+    role: { $ne: UserRoles.ADMIN },
   }).select("_id name role email")
   if (!users) {
     throw new Error("No users found")
@@ -14,12 +15,9 @@ export const getUsers = async () => {
 }
 
 export const getUserCount = async (user) => {
-  if (user.role !== "admin")
-    throw new CustomError(403, "only admins can access user count")
-
   const count = await User.countDocuments({
     isActive: true,
-    role: { $ne: "admin" },
+    role: { $ne: UserRoles.ADMIN },
   })
   return { count }
 }
